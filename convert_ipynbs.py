@@ -2,11 +2,16 @@ import nbformat
 import glob
 import os
 import re
+import logging
+import sys
 from traitlets.config import Config
 from nbconvert import HTMLExporter
 from shutil import copyfile
 
 import custom_configs as conf
+
+# Setup logger
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 # Setup html exporter template/configs
 html_exporter = HTMLExporter()
@@ -41,34 +46,60 @@ def get_nb_info(nb_node):
 
 def get_nb_title(nb_node):
     """ Get notebook title give a nb_node (json) """
+
+    logging.debug('Getting nb_title: {}'.format(type(nb_node)))
+
     for cell in nb_node.cells:
         if cell.source.startswith('#'):
-            return cell.source[1:].splitlines()[0].strip()
+            title = cell.source[1:].splitlines()[0].strip()
+            cleaned_title = re.sub(r'[^\w\s]', '', title)
+            break
+
+    logging.debug('Got title: {}'.format(cleaned_title))
+    return cleaned_title or ''
 
 
 def get_nb_topics(nb_node):
     """ Get notebook topics give a nb_node (json) """
+
+    logging.debug('Getting nb_topics: {}'.format(type(nb_node)))
+
     txt_src = nb_node.cells[0].source
     m = re.search(conf.REGEX_TOPICS, txt_src)
-    if len(m.groups) != 0:
-        topics = m.group(0).replace("**Topics Covered**\n* ", "").split("\n* ")
-    else topics = ''
+
+    if len(m.group()) != 0:
+        topics = m.group().replace("**Topics Covered**\n* ", "").split("\n* ")
+    else: 
+        topics = ''
+
+    logging.debug('Got topics: {}'.format(str(topics)))
     return str(topics)
 
 
 def get_front_matter(nb_node):
     """ Get front matter for Jekyll """
+
+    logging.debug('Getting front_matter: {}'.format(type(nb_node)))
+
     layout = "notebook"
     title = get_nb_title(nb_node)
+    
     # TODO HARDEN - check for special chars in title?
     permalink = title.lower().replace(" ", "-")
+
+    logging.debug('Got permalink: {}'.format(permalink))
+
     topics = str(get_nb_topics(nb_node))
+
+    logging.debug('Got topics: {}'.format(topics))
+
     return "---\nlayout: {}\ntitle: {}\npermalink: /{}/\ntopics: {}\n---\n".format(layout, title, permalink, topics)
 
 
 def get_nb_nav(prev, nxt):
     """ Get html for notebook navigation """
-    #TODO update to use Liquid relative urls
+
+    logging.debug('Getting nb nav: {}, {}'.format(type(prev), type(nxt)))
 
     nav_comment = '<!-- NAV -->'
 
@@ -79,6 +110,8 @@ def get_nb_nav(prev, nxt):
         prev_link = prev_title.lower().replace(" ", "-")
         prev_nb = '&lt; <a href="{{{{ "{}" | relative_url }}}}">{}</a> | '.format(prev_link, prev_title)
 
+    logging.debug('Got prev_nb: {}'.format(prev_nb))
+
     contents = '<a href="/ipynb_template_site/">Contents</a>'
 
     if nxt == None:
@@ -88,6 +121,8 @@ def get_nb_nav(prev, nxt):
         nxt_link = nxt_title.lower().replace(" ", "-")
         nxt_nb = ' | <a href="{{{{ "{}" | relative_url }}}}">{}</a> &gt;'.format(nxt_link, nxt_title)
     
+    logging.debug('Got nxt_nb: {}'.format(nxt_nb))
+
     nb_nav = '{}<p style="font-style:italic;font-size:smaller;">{}{}{}</p>'.format(nav_comment, prev_nb, contents, nxt_nb)
     return nb_nav
 
@@ -157,7 +192,7 @@ def move_assets(inp=conf.NB_ASSET_DIRS):
                 print("Copying file: {}...".format(fname))
                 fdest = dest + subdir
                 if not os.path.exists(fdest):
-                    os.mkdir(fdest)
+                    os.makedirs(fdest)
                 copyfile(src, fdest + '/' + fname)
 
 if __name__ == '__main__':
