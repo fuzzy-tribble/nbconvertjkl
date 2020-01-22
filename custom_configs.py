@@ -11,6 +11,7 @@ OUTPUT_NB_DIR = '../docs/_notebooks/'
 
 # NOTEBOOK INFO
 # Edit the notebook info that you want at the top of your notebook pages
+# TODO: put this in config yml variable
 NB_INFO = "<!--NB_INFO-->" + """<img align="left" width="30" style="padding-right:10px;" src="{{ '/assets/images/python-logo.png' | relative_url }}"><p style="font-style:italic;font-size:smaller;">This notebook is part of the {{ site.title }}; the content is available <a href="https://github.com/nancynobody">on GitHub</a>.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>"""
 
 # NOTEBOOK NAV
@@ -23,7 +24,7 @@ NB_NAV = True
 # Topics Covered
 # \n* Topic A
 # \n* Topic B
-REGEX_TOPICS = r"\*\*Topics\sCovered\*\*([\\n\*\s]+[\w\s]+)+" 
+REGEX_TOPICS = r"\*\*Topics\sCovered\*\*([\\n\*\s]+[\w\s]+)+"
 
 # NOTEBOOK TITLE
 # TODO allow config option for displaying nb title
