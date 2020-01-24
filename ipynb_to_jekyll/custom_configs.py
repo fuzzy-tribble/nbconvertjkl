@@ -12,7 +12,7 @@ OUTPUT_NB_DIR = '../docs/_notebooks/'
 # NOTEBOOK INFO
 # Edit the notebook info that you want at the top of your notebook pages
 # TODO: put this in config yml variable
-NB_INFO = "<!--NB_INFO-->" + """<img align="left" width="30" style="padding-right:10px;" src="{{ '/assets/images/python-logo.png' | relative_url }}"><p style="font-style:italic;font-size:smaller;">This notebook is part of the {{ site.title }}; the content is available <a href="https://github.com/nancynobody">on GitHub</a>.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>"""
+NB_INFO = "<!--NB_INFO-->" + """<img align="left" width="30" style="padding-right:10px;" src="{{ '/assets/figures/python-logo.png' | relative_url }}"><p style="font-style:italic;font-size:smaller;">This notebook is part of the {{ site.title }}; the content is available <a href="https://github.com/nancynobody/python3_fluency">on GitHub</a>. If you want to launch the notebooks interactively click on the binder stamp below to launch a live notebook server or download the notebooks and run them locally. .</p>"""
 
 # NOTEBOOK NAV
 # True shows navigation, False doesn't
