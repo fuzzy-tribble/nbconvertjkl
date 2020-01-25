@@ -1,10 +1,16 @@
 """Global configuration handling."""
 
+import logging
+import os
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
-    "nb_dir": os.path.expanduser("~/notebooks/"),
-    "site_dir": os.path.expanduser("~/docs/"),
+    "nb_dir": Path('../notebooks/'),
+    "site_dir": Path("../docs/"),
+    "site_nb_dir": Path("../docs/_notebooks/"),
+    "site_assets_dir": Path("../docs/assets/"),
 }
 
 def get_config():
