@@ -2,10 +2,11 @@
 
 import click
 import sys
+import nbformat
 
-from nbconvert.log import configure_logger
-from nbconvert.config import get_config
-from nbconvert import convert
+from nbconvertjkl.log import configure_logger
+from nbconvertjkl.config import get_config
+from nbconvertjkl import convert
 
 @click.command()
 def run():
@@ -25,19 +26,17 @@ def run():
     config_dict = get_config()
 
     # Collect nb files
-    click.echo("Looking for notebooks (*.ipynb) in {} folder".format(config_dict["nb_dir"]))
-    nb_files = convert.get_nb_files(config_dict['nb_dir'])
+    click.echo("Looking for notebooks in {}".format(config_dict["nbs"]))
+    nb_files = convert.get_nb_files(config_dict['nbs'])
 
-    logger.debug(nb_files)
-
-    if len(nb_files) < file_rng[0]:
-        click.echo("No *.ipynb files found in {} X\nMake sure you have *.ipynb files in the 'nb_dir' of your config file...")
+    if nb_files == None or len(nb_files) < file_rng[0]:
+        click.secho("No notebooks found. Make sure the 'nbs' config option is set properly and try again.", fg='red')
         sys.exit(1)
     elif len(nb_files) > file_rng[1]:
-        click.echo("More than 10 *.ipynb files found...do you want to automate?")
-        #TODO add automation feature for big sites
+        click.echo("More than {} notebooks found...do you want to automate?".format(file_rng[1]))
+        #TODO add automation feature for bigger sites
     else:
-        if not click.confirm('Found the following notebooks.\nDo you want to continue?'):
+        if not click.confirm('Found the following notebooks: {}\nDo you want to continue?'.format()):
             sys.exit(1)
         else:
             # Convert nb_files

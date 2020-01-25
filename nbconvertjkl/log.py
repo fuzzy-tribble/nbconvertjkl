@@ -23,7 +23,7 @@ def configure_logger(stream_level="DEBUG", debug_file=None):
     up logging to file with DEBUG level.
     """
     # Set up logger
-    logger_name = "ipynb_to_jekyll"
+    logger_name = "nbconvertjkl"
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
 

@@ -127,15 +127,13 @@ def get_nb_nav(prev, nxt):
     return nb_nav
 
 
-def get_nb_files(nb_dir=None):
+def get_nb_files(nbs=None):
     """ Get sorted list of nb files from nb_dir """
 
-    try:
-        nb_files = list(nb_dir.glob("*.ipynb"))
-    except Exception as e:
-        logger.error(
-            'Error at %s',
-            'division',
-            exc_info=e)
+    logger.debug("Getting notebook files: {}".format(nbs))
 
-    return nb_files.sort()
+    nb_files = glob.glob(nbs)
+    nb_files.sort()
+    logger.debug("Found nb_files: {}".format(nb_files))
+
+    return nb_files

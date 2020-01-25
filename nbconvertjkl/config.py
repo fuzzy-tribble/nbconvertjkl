@@ -7,7 +7,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
-    "nb_dir": Path('../notebooks/'),
+    "nbs": os.path.join(os.path.dirname(__file__), '../../notebooks/*.ipynb'),
     "site_dir": Path("../docs/"),
     "site_nb_dir": Path("../docs/_notebooks/"),
     "site_assets_dir": Path("../docs/assets/"),
