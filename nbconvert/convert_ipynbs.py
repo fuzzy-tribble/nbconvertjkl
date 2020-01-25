@@ -195,6 +195,6 @@ def move_assets(inp=conf.NB_ASSET_DIRS):
                     os.makedirs(fdest)
                 copyfile(src, fdest + '/' + fname)
 
-if __name__ == '__main__':
-    ipynb_to_html()
-    move_assets()
+# if __name__ == '__main__':
+#     ipynb_to_html()
+#     move_assets()
