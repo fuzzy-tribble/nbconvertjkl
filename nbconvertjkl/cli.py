@@ -6,8 +6,9 @@ import nbformat
 
 from nbconvertjkl.log import configure_logger
 from nbconvertjkl.config import get_config
-from nbconvertjkl import convert
-from nbconvertjkl import copy_assets
+from nbconvertjkl.converter import Converter
+# from nbconvertjkl import convert
+# from nbconvertjkl import copy_assets
 
 @click.command()
 def run():
@@ -16,72 +17,59 @@ def run():
     logger = configure_logger()
     config_dict = get_config()
 
-    click.echo("Gathering notebooks from {}".format(config_dict["nbs"]))
-    nb_files = convert.get_nb_files(config_dict['nbs'])
+    click.echo("Initializing converter and gathering notebooks.")
+    converter = Converter(config_dict)
 
-    if nb_files == None or len(nb_files) < 1:
-        click.secho("No notebooks found. Make sure the "
-                    "'nbs' config option is set properly "
+    if not converter.new_nbs:
+        click.secho("No notebooks found.\nMake sure the "
+                    "read/write config paths are set properly "
                     "and try again.\nExiting", fg='red')
         sys.exit(1)
     
     else:
-        if not click.confirm('Found {} notebooks.\nDo you want to continue?'.format(len(nb_files))):
+
+        if not click.confirm("Found {} notebooks to convert.\nDo you want to continue?".format(len(converter.new_nbs))):
             sys.exit(1)
-        else:
-            #TODO: add nb_info and nb_nav check in config file
-            click.echo("Found nb_info and nb_nav in your config file. "
-                        "These will be included at the top of your notebooks.")
-
-            for i in range(len(nb_files)):
-                curr_nb_fname = nb_files[i].split("/")[-1]
-                new_nb_fname = curr_nb_fname[:-5] + "html"
-                click.secho("Preparing to convert notebook {} -> {}".format(curr_nb_fname, new_nb_fname), fg='bright_white')
-
-                # track prev, curr, next for navigation purposes
-                curr_nb_node = nbformat.read(nb_files[i], as_version=4)
-                if i == 0:
-                    prev_nb_node = None
-                    next_nb_node = nbformat.read(nb_files[i+1], as_version=4)
-                elif i == len(nb_files)-1:
-                    prev_nb_node = nbformat.read(nb_files[i-1], as_version=4)
-                    next_nb_node = None
-                else:
-                    prev_nb_node = nbformat.read(nb_files[i-1], as_version=4)
-                    next_nb_node = nbformat.read(nb_files[i+1], as_version=4)
         
-                # convert, add info, front matter, etc
-                front_matter = convert.get_front_matter(curr_nb_node)
-                nb_info = convert.get_nb_info(curr_nb_node)
-                nb_nav = convert.get_nb_nav(prev_nb_node, next_nb_node)
-                body = convert.get_body(curr_nb_node)
+        else:
+            
+            click.echo("Converting notebooks...")
+            converter.convert()
 
-                # confirm / customize
-                click.echo("Extracted the following front_matter:\n{}".format(front_matter))
-                click.echo('Enter to save and continue or edit [e]?', nl=False)
-                c = click.getchar()
-                click.echo()
-                if c == 'e':
-                    front_matter = click.edit(front_matter)
+            click.echo("Please verify the front matter (title, link, topics covered) for each notebook.")
+            for nbtitle in converter.new_nbs.keys():
+
+                click.secho("*****{}*****".format(nbtitle), fg='bright_white')
+
+                #TODO add or skip each notebook
+                # click.confirm("Add this notebook to your site (skipping this notebook will simply leave it out of the site)".format(fm))
+                
+                fm = converter.new_nbs[nbtitle]["front_matter"]
+                click.echo("Notebook front_matter:\n{}".format(fm))
+                
+                res = click.prompt("Press 'e' to edit or any key to save and continue.", default='s')
+                if res == 'e':
+                    edited_fm = click.edit(fm)
                     #TODO validate edited front_matter
-                    # isValidFrontMatter(front_matter)
+                    # if not converter.is_valid_front_matter(edited_fm):
+                        # edit again
 
-                write_path = config_dict["site_nb_dir"] + new_nb_fname
-                click.echo("Writing notebook: {}".format(new_nb_fname))
+            click.secho("Converter summary:".format(nbtitle), fg='bright_white')
+            click.echo(converter.get_summary())
+            # click.confirm("Write files and finish?")
 
-                #TODO Empty _notebooks folder of existing nbs
-                #TODO Add confirmation before for overwriting existing
-                with open(write_path, "w") as file:
-                    file.write(front_matter)
-                    if nb_info:
-                        file.write(nb_info)
-                    if nb_nav:
-                        file.write(nb_nav)
-                    file.write(body)
+            # #TODO Empty _notebooks folder of existing nbs
+            # #TODO Add confirmation before for overwriting existing
+            # click.secho("Found existing notebooks in docs/_notebooks. This action will replace all existing with the new ones in the summary.", fg='red')
+            # click.confirm("Are you sure you want to overwrite all existing?")
 
-                click.echo("Done.")
+            # # TODO add click.progressbar()
+            # click.echo("Writing notebooks...")
+            # converter.write_nbs()
 
-            move_nb_assets()
+            # # TODO add click.progressbar()
+            # click.echo("Collecting and moving notebook assets...")
+            # converter.copy_and_move_assets()
 
 
 if __name__ == "__main__":
