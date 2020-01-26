@@ -33,7 +33,8 @@ def link_repl(matchobj):
 
 def fix_links(body):
     """ Find all local asset links and correct """
-    s = '|'.join(conf.NB_ASSET_DIRS)
+    asset_dirs = ['figures', 'data', 'images', 'imgs']
+    s = '|'.join(asset_dirs)
     regex = re.compile(r'(?:source|src)=\"(\/?(?:%s)\/[\w\d\-_\.]+)\"' % s, re.IGNORECASE)
     fixed_body = re.sub(regex, link_repl, body)
     return fixed_body
@@ -41,7 +42,8 @@ def fix_links(body):
 
 def get_nb_info(nb_node):
     """ Return nb info from configs or nothing"""
-    return conf.NB_INFO or False
+    nb_info =  "<!--NB_INFO-->" + """<img align="left" width="30" style="padding-right:10px;" src="{{ '/assets/figures/python-logo.png' | relative_url }}"><p style="font-style:italic;font-size:smaller;">This notebook is part of the {{ site.title }}; the content is available <a href="https://github.com/nancynobody/python3_fluency">on GitHub</a>. If you want to launch the notebooks interactively click on the binder stamp below to launch a live notebook server or download the notebooks and run them locally. .</p>"""
+    return nb_info or False
 
 
 def get_nb_title(nb_node):
@@ -64,8 +66,10 @@ def get_nb_topics(nb_node):
 
     logging.debug('Getting nb_topics: {}'.format(type(nb_node)))
 
+    regex = r"\*\*Topics\sCovered\*\*([\\n\*\s]+[\w\s]+)+"
+
     txt_src = nb_node.cells[0].source
-    m = re.search(conf.REGEX_TOPICS, txt_src)
+    m = re.search(regex, txt_src)
 
     if len(m.group()) != 0:
         topics = m.group().replace("**Topics Covered**\n* ", "").split("\n* ")
