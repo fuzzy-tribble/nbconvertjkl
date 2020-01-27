@@ -185,7 +185,7 @@ class Converter:
 
         nav_comment = '<!-- NAV -->'
         prev_nb = ''
-        contents = '<a href="{{{{ "/" | relative_url }}}}">Contents</a>'
+        contents = '<a href="{{ "/" | relative_url }}">Contents</a>'
         next_nb = ''
 
         if prev_key != None:
