@@ -14,7 +14,8 @@ DEFAULT_CONFIG = {
     "nb_write_path": os.path.join(os.path.dirname(__file__), '../../docs/_notebooks/'),
     "asset_write_path": os.path.join(os.path.dirname(__file__), '../../docs/assets/'),
     "asset_subdirs": ['figures', 'data', 'images', 'imgs', 'img'],
-    "nb_nav": True,
+    "nb_nav_top": True,
+    "nb_nav_bottom": True,
 }
 
 

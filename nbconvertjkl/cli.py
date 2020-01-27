@@ -56,7 +56,7 @@ def run():
                         else:
                             fm_confirmed = converter.validate_front_matter(fm)
 
-            if config_dict['nb_nav']:
+            if config_dict['nb_nav_top'] or config_dict['nb_nav_bottom']:
                 converter.add_nb_nav()
             else:
                 logger.debug('No nb nav added - see configs to change')

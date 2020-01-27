@@ -206,7 +206,6 @@ class Converter:
 
         self.logger.debug("Adding nb nav...")
 
-
         # List of keys of nbs to build
         build_keys = [k for k in self.new_nbs if not self.new_nbs[k]['skip_build']] 
 
@@ -264,11 +263,18 @@ class Converter:
                 with open(self.conf['nb_write_path'] + self.new_nbs[nbtitle]['fname'] + '.html', "w") as file:
                     
                     file.write(self.new_nbs[nbtitle]['front_matter'])
+                    
                     if self.new_nbs[nbtitle]['info']:
                         file.write(self.new_nbs[nbtitle]['info'])
-                    if self.new_nbs[nbtitle]['nav']:
+                    
+                    if self.conf['nb_nav_top']:
                         file.write(self.new_nbs[nbtitle]['nav'])
+                    
                     file.write(self.new_nbs[nbtitle]['body'])
+                    
+                    if self.conf['nb_nav_bottom']:
+                        file.write(self.new_nbs[nbtitle]['nav'])
+                    
                     self.logger.debug("Written.")    
             else:
                 self.logger.debug("Skipped.")
