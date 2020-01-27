@@ -9,7 +9,14 @@ from traitlets.config import Config
 from nbconvert import HTMLExporter
 from shutil import copyfile
 
+#TODO add validation and error checking throughout
+#TODO cleanup logging
+#TODO cleanup return values
+#TODO use fname instead of title for dict keys (guarunteed to be different)
+
 class Converter:
+
+
     def __init__(self, config_dict, new_nbs=None, existing_nbs=None):
         ''' The converter workhorse '''
         self.conf = config_dict
@@ -18,6 +25,7 @@ class Converter:
         self.new_nbs = new_nbs or self.collect_new_nbs()
         self.existing_nbs = existing_nbs or self.collect_existing_nbs()
 
+
     def collect_existing_nbs(self):
         """ Collects existing notebooks from site notebooks folder """
         
@@ -25,6 +33,8 @@ class Converter:
         
         nb_file_paths = glob.glob(self.conf['nb_write_path'] + '*')
         nb_file_paths.sort()
+
+        self.logger.debug("Found: {}".format(len(nb_file_paths)))
         
         return nb_file_paths
 
@@ -37,13 +47,15 @@ class Converter:
         nb_file_paths = glob.glob(self.conf['nb_read_path'] + '*.ipynb')
         nb_file_paths.sort()
 
-        self.logger.debug("Glob matches: {}".format(len(nb_file_paths)))
+        self.logger.debug("Found: {}".format(len(nb_file_paths)))
 
         nbs = {}
         for nb_path in nb_file_paths:
             self.logger.debug("\nGathering notebook: {}".format(nb_path))
             
             new_nb = {}
+            new_nb['fname'] = nb_path.split("/")[-1][:-6]
+            new_nb['skip_build'] = False
             new_nb['read_path'] = self.conf['nb_read_path']
             new_nb['write_path'] = self.conf['nb_write_path']
             new_nb['nbnode'] = self.get_nbnode(nb_path)
@@ -58,47 +70,39 @@ class Converter:
 
             new_nb['front_matter'] = self.get_front_matter(new_nb['title'], new_nb['permalink'], new_nb['topics'])
 
-            self.logger.debug("\n{}\n".format(new_nb['front_matter']))
-
             temp = {}
             temp[new_nb['title']] = new_nb
             nbs.update( temp )
-        
-        #TODO Add nav and info at the top
 
         return nbs
     
 
-    def convert(self):
-        #TODO implement convert
-        pass
+    def get_summary(self):
+        """ Print summary of nbs """
 
+        self.logger.debug('Getting summary...')
 
-    # def get_summary(self, nbs=None):
-    #     """ Print summary of nbs """
-
-    #     self.logger.debug('Getting summary...')
-
-    #     if not nbs:
-    #         nbs = self.new_nbs
+        nbs_str = ""
         
-    #     intro_str = "**** SUMMARY START ****\n"
-    #     nbs_str = ""
-    #     close_str = "**** SUMMARY STOP ****\n"
-        
-    #     for title in nbs.keys():
-
-    #         self.logger.debug(title)
+        for k in self.new_nbs.keys():
             
-    #         fm = self.new_nbs[title]['front_matter']
-    #         info = self.new_nbs[title]['info'] or 'No info'
-    #         nav = self.new_nbs[title]['nav'] or 'No navigation'
-    #         body_prev = None
-    #         nb_str = "\nTITLE: {}\nFRONT_MATTER:\n{}\nINFO:\n{}\nNAV:\n{}\nBODY_PREVIEW:\n{}".format(title, fm, info, nav, body_prev)
-    #         nbs_str = nbs_str.join(nb_str)
+            fname = self.new_nbs[k]['fname']
 
-    #     return intro_str + nbs_str + close_str
+            if self.new_nbs[k]['skip_build']:
+                nb_str = "\n\n{} -- SKIPPED".format(fname)
+            
+            else:
+                fm = self.new_nbs[k]['front_matter']
+                info = self.new_nbs[k]['info'] or ''
+                nav = self.new_nbs[k]['nav'] or ''
+                body = '<!--HTML BODY - not shown in preview...too long-->'
+                nb_str = "\n\n{}.html\n{}\n{}\n{}\n{}".format(fname, fm, info, nav, body)
+            
+            nbs_str = nbs_str + nb_str
 
+        return nbs_str
+
+    
     def get_nbnode(self, nb_path):
         """ Returns the nbnode """
         return nbformat.read(nb_path, as_version=4)
@@ -127,7 +131,7 @@ class Converter:
 
     def fix_links(self, body):
         """ Find all local asset links and correct """
-        s = '|'.join(self.conf['nb_asset_dirs'])
+        s = '|'.join(self.conf['asset_subdirs'])
         regex = re.compile(r'(?:source|src)=\"(\/?(?:%s)\/[\w\d\-_\.]+)\"' % s, re.IGNORECASE)
         fixed_body = re.sub(regex, self.link_repl, body)
         return fixed_body
@@ -173,15 +177,67 @@ class Converter:
 
         return str(topics)
 
+    
+    def add_nb_info(self):
+        """ Add nb into to all notebooks in the build """
 
-    def get_info(self, nb):
-        """ Return notebook info """
-        pass
+        self.logger.debug("Adding nb info")
+
+        for k in self.new_nbs.keys():
+            if not self.new_nbs[k]['skip_build']:
+                self.new_nbs[k]['info'] = self.conf['nb_info']
+
+        return True
 
 
-    def get_nav(self, nb):
-        """ Return notebook nav """
-        pass
+    def get_nb_nav(self, prev_key=None, next_key=None):
+        """ Get html for notebook navigation """
+        
+        self.logger.debug("Getting nb nav...")
+
+        nav_comment = '<!-- NAV -->'
+        prev_nb = ''
+        contents = '<a href="{{{{ "/" | relative_url }}}}">Contents</a>'
+        next_nb = ''
+
+        if prev_key != None:
+            prev_title = self.new_nbs[prev_key]['title']
+            prev_link = self.new_nbs[prev_key]['permalink']
+            prev_nb = '&lt; <a href="{{{{ "{}" | relative_url }}}}">{}</a> | '.format(prev_link, prev_title)
+
+        if next_key != None:
+            next_title = self.new_nbs[next_key]['title']
+            next_link = self.new_nbs[next_key]['permalink']
+            next_nb = ' | <a href="{{{{ "{}" | relative_url }}}}">{}</a> &gt;'.format(next_link, next_title)
+
+        nb_nav = '\n{}<p style="font-style:italic;font-size:smaller;">{}{}{}</p>'.format(nav_comment, prev_nb, contents, next_nb)
+        return nb_nav
+    
+    def add_nb_nav(self):
+        """ Add nav to all nbs in the build """
+
+        self.logger.debug("Adding nb nav...")
+
+
+        # List of keys of nbs to build
+        build_keys = [k for k in self.new_nbs if not self.new_nbs[k]['skip_build']] 
+
+        for i in range(len(build_keys)):
+            curr_nb_key = build_keys[i]
+            self.logger.debug("{}".format(self.new_nbs[curr_nb_key]['fname']))
+            if i == 0:
+                prev_nb_key = None
+                next_nb_key = build_keys[i+1]
+            elif i == len(build_keys)-1:
+                prev_nb_key = build_keys[i-1]
+                next_nb_key = None
+            else:
+                prev_nb_key = build_keys[i-1]
+                next_nb_key = build_keys[i+1]
+
+            self.new_nbs[curr_nb_key]['nav'] = self.get_nb_nav(prev_nb_key, next_nb_key)
+
+        return True
 
 
     def get_front_matter(self, title, permalink, topics):
@@ -194,9 +250,68 @@ class Converter:
         return fm
 
     
-    def write_notebook(self, nb_list=None):
-        pass
+    def clean_write_dir(self):
+        """ Remove files from the write directory in conf """
+        
+        self.logger.debug("Removing files from write dir...")
+
+        files = glob.glob(self.conf['nb_write_path'] + '*')
+        for f in files:
+            os.remove(f)
+            self.logger.debug("Removed: {}".format(f))
+        
+        return True
+    
+    
+    def write_nbs(self):
+        """ Write notebooks"""
+
+        self.logger.debug("Writing notebooks...")
+
+        for nbtitle in self.new_nbs.keys():
+
+            self.logger.debug("{}".format(nbtitle))
+            
+            if not self.new_nbs[nbtitle]['skip_build']:
+                with open(self.conf['nb_write_path'] + self.new_nbs[nbtitle]['fname'] + '.html', "w") as file:
+                    
+                    file.write(self.new_nbs[nbtitle]['front_matter'])
+                    if self.new_nbs[nbtitle]['info']:
+                        file.write(self.new_nbs[nbtitle]['info'])
+                    if self.new_nbs[nbtitle]['nav']:
+                        file.write(self.new_nbs[nbtitle]['nav'])
+                    file.write(self.new_nbs[nbtitle]['body'])
+                    self.logger.debug("Written.")    
+            else:
+                self.logger.debug("Skipped.")
+        return True
 
 
-    def copy_and_move_assets(self, nb):
-        pass
+    def copy_and_move_assets(self):
+        """ Move assets (images, etc) from notebook folder to docs/assets folder """
+        #TODO change so it doesn't overwrite by default
+        # clean_write_dir should be run first cause it confirms with user
+        
+
+        for subdir in self.conf['asset_subdirs']:
+            
+            self.logger.debug("Looking in: {}".format(subdir))
+            files = glob.glob(self.conf['nb_read_path'] + subdir + '/*')
+            self.logger.debug("Found files: {}".format(files))
+            
+            for src in files:
+                if os.path.isfile(src):
+                    fname = src.split("/")[-1]
+                    self.logger.debug("Copying file: {}...".format(fname))
+                    fdest = self.conf['asset_write_path'] + subdir
+                    if not os.path.exists(fdest):
+                        os.makedirs(fdest)
+                    copyfile(src, fdest + '/' + fname)
+
+            return True
+
+
+    def validate_front_matter(self, fm=None):
+        """ Validate front_matter """
+        #TODO
+        return True
