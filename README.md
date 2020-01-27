@@ -2,4 +2,14 @@
 
 This repository contains tools for converting .ipynb files to markdown and/or html so that they can be used by Jekyll (the static compiler that GitHub pages uses)
 
-TODO
+## Installation
+
+Install using `pip3 install nbconvertjkl`
+
+## Commandline Usage
+
+To launch interactive command line site build
+```bash
+python -m nbconvertjkl
+```
+
