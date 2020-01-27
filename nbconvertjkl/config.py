@@ -14,7 +14,6 @@ DEFAULT_CONFIG = {
     "nb_write_path": os.path.join(os.path.dirname(__file__), '../../docs/_notebooks/'),
     "asset_write_path": os.path.join(os.path.dirname(__file__), '../../docs/assets/'),
     "asset_subdirs": ['figures', 'data', 'images', 'imgs', 'img'],
-    "nb_info": "<!--NB_INFO-->" + """<img align="left" width="30" style="padding-right:10px;" src="{{ '/assets/figures/python-logo.png' | relative_url }}"><p style="font-style:italic;font-size:smaller;">This notebook is part of the {{ site.title }}; the content is available <a href="https://github.com/nancynobody/python3_fluency">on GitHub</a>. If you want to launch the notebooks interactively click on the binder stamp below to launch a live notebook server or download the notebooks and run them locally. .</p>""",
     "nb_nav": True,
 }
 

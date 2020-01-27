@@ -56,11 +56,6 @@ def run():
                         else:
                             fm_confirmed = converter.validate_front_matter(fm)
 
-            if config_dict['nb_info']:
-                converter.add_nb_info()
-            else:
-                logger.debug('No nb info added - see configs to change')
-
             if config_dict['nb_nav']:
                 converter.add_nb_nav()
             else:

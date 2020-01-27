@@ -66,7 +66,7 @@ class Converter:
             new_nb['permalink'] = self.get_permalink(new_nb['title'])
 
             new_nb['nav'] = None
-            new_nb['info'] = None
+            new_nb['info'] = "{{site.nb_info}}"
 
             new_nb['front_matter'] = self.get_front_matter(new_nb['title'], new_nb['permalink'], new_nb['topics'])
 
@@ -178,18 +178,6 @@ class Converter:
         return str(topics)
 
     
-    def add_nb_info(self):
-        """ Add nb into to all notebooks in the build """
-
-        self.logger.debug("Adding nb info")
-
-        for k in self.new_nbs.keys():
-            if not self.new_nbs[k]['skip_build']:
-                self.new_nbs[k]['info'] = self.conf['nb_info']
-
-        return True
-
-
     def get_nb_nav(self, prev_key=None, next_key=None):
         """ Get html for notebook navigation """
         
