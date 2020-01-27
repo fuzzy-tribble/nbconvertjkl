@@ -198,7 +198,7 @@ class Converter:
             next_link = self.new_nbs[next_key]['permalink']
             next_nb = ' | <a href="{{{{ "{}" | relative_url }}}}">{}</a> &gt;'.format(next_link, next_title)
 
-        nb_nav = '\n<br>{}<p style="font-style:italic;font-size:smaller;">{}{}{}</p>\n'.format(nav_comment, prev_nb, contents, next_nb)
+        nb_nav = '\n<br><br>{}<p style="font-style:italic;font-size:smaller;">{}{}{}</p>\n'.format(nav_comment, prev_nb, contents, next_nb)
         return nb_nav
     
     
