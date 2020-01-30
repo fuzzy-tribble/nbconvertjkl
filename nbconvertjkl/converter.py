@@ -306,7 +306,7 @@ class Converter:
                         os.makedirs(fdest)
                     copyfile(src, fdest + '/' + fname)
 
-            return True
+        return True
 
 
     def validate_front_matter(self, fm=None):
