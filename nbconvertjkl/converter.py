@@ -170,9 +170,11 @@ class Converter:
         txt_src = nb_node.cells[0].source
         regex = r"\*\*Topics\sCovered\*\*([\\n\*\s]+[\w\s]+)+"
         m = re.search(regex, txt_src)
-        if len(m.group()) != 0:
-            topics = m.group().replace("**Topics Covered**\n* ", "").split("\n* ")
-        else: 
+
+        if m:  # m is None
+            if len(m.group()) != 0:
+                topics = m.group().replace("**Topics Covered**\n* ", "").split("\n* ")
+        else:
             topics = ''
 
         return str(topics)
@@ -261,6 +263,7 @@ class Converter:
             self.logger.debug("{}".format(nbtitle))
             
             if not self.new_nbs[nbtitle]['skip_build']:
+                #TODO create _notebooks if it doesn't exist rather than error
                 with open(self.conf['nb_write_path'] + self.new_nbs[nbtitle]['fname'] + '.html', "w") as file:
                     
                     file.write(self.new_nbs[nbtitle]['front_matter'])
