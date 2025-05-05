@@ -4,7 +4,10 @@ This repository contains tools for converting .ipynb files to markdown and/or ht
 
 ## Installation
 
-Install using `pip3 install nbconvertjkl`
+Install using 
+```bash
+pip3 install nbconvertjkl
+```
 
 ## Commandline Usage
 
