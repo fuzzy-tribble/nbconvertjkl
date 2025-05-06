@@ -23,15 +23,62 @@ This tool converts Jupyter Notebooks (`.ipynb`) into HTML pages suitable for use
 
 ## Installation
 
-Install using 
+Install from PyPI using pip: 
 ```bash
 pip3 install nbconvertjkl
 ```
 
-## Commandline Usage
+or clone the repository and install using:
+```bash
+# clone repo and activate virtualenv then install requirements
+pip install -r requirements.txt
+```
+
+## Usage
 
 To launch interactive command line site build
 ```bash
 python -m nbconvertjkl
 ```
 
+## Contributing
+
+To contribute or work locally:
+
+1. **Set up the environment**
+   ```bash
+   # Clone the repo
+   git clone https://github.com/yourusername/nbconvertjkl.git
+   cd nbconvertjkl
+
+   # Make sure you are using a compatible Python version
+   python3 --version # if not, use pyenv to install the correct version
+   pyenv install 3.6.15
+   pyenv shell 3.6.15
+
+   # (Optional) Create a virtualenv
+   python3 -m venv .venv
+   source .venv/bin/activate
+
+   # Install dependencies and package in editable mode
+   pip install -e .
+   ```
+2. Run the tool locally
+   ```bash
+   # Main entry point
+   python -m nbconvertjkl --config path/to/config.yml
+   ```
+
+3. **Run tests**
+   ```bash
+   # Run tests
+   pytest tests/
+   ```
+
+4. **(Optional) Build and check package locally**
+   Building is  handles in the release-build job of the github action on release. But if you want to build locally, you can do so:
+   ```bash
+   # Build and check package
+   python -m build
+   python -m twine check dist/*
+   ```
