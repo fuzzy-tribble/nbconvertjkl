@@ -1,18 +1,11 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
-
 setuptools.setup(
     name="nbconvertjkl-fuzzy-tribble",
     version="0.0.1",
     author="fuzzy-tribble",
-    # author_email="author@example.com",
-    description="A package to convert ipynbs to jekyll compatable for GitHub pages (including front matter, nav/links, etc)",
-    long_description=long_description,
+    description="Convert ipynbs to Jekyll-compatible HTML/Markdown for GitHub Pages (adds front matter, navigation, asset fixes)",
+    long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/fuzzy-tribble/python3_fluency",
     packages=setuptools.find_packages(),
@@ -21,6 +14,31 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6,<3.7',
-    install_requires=requirements,
+    python_requires=">=3.6,<3.7",
+    install_requires=[
+        "attrs==19.3.0",
+        "bleach==3.1.0",
+        "Click==7.0",
+        "decorator==4.4.1",
+        "defusedxml==0.6.0",
+        "entrypoints==0.3",
+        "importlib-metadata==1.4.0",
+        "ipython-genutils==0.2.0",
+        "Jinja2==2.10.3",
+        "jsonschema==3.2.0",
+        "jupyter-core==4.6.1",
+        "MarkupSafe==1.1.1",
+        "mistune==0.8.4",
+        "more-itertools==8.1.0",
+        "nbconvert==5.6.1",
+        "nbformat==5.0.4",
+        "pandocfilters==1.4.2",
+        "Pygments==2.5.2",
+        "pyrsistent==0.15.7",
+        "six==1.14.0",
+        "testpath==0.4.4",
+        "traitlets==4.3.3",
+        "webencodings==0.5.1",
+        "zipp==2.0.1",
+    ],
 )
