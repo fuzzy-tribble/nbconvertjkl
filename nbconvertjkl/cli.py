@@ -11,7 +11,8 @@ from nbconvertjkl.converter import Converter
 #TODO maybe add click.progressbar() for some things
 
 @click.command()
-def run():
+@click.option('--yes', is_flag=True, help="Run without confirmation prompts.")
+def run(yes):
     """ Simple program that helps you build Jekyll compatable html files from ipython notebooks """
 
     logger = configure_logger()
@@ -28,14 +29,14 @@ def run():
     
     else:
 
-        if not click.confirm("Found {} notebooks to convert.\nDo you want to continue?".format(len(converter.new_nbs)), default=True):
+        if not yes and not click.confirm("Found {} notebooks to convert.\nDo you want to continue?".format(len(converter.new_nbs)), default=True):
             sys.exit(1)
         
         else:
 
             for nbtitle in converter.new_nbs.keys():
 
-                if not click.confirm(click.style("{} -- Add nb to site? ('n' will skip it)".format(nbtitle), fg='bright_white'), default=True):
+                if not yes and not click.confirm(click.style("{} -- Add nb to site? ('n' will skip it)".format(nbtitle), fg='bright_white'), default=True):
                     converter.new_nbs[nbtitle]['skip_build'] = True
                     click.secho("Skipped.", fg='red')
                 else:
@@ -50,7 +51,7 @@ def run():
                             click.secho("The front matter displayed is invalid. Please edit it.", fg='red')
                             #TODO add specific validation error so user knows whats wrong
                         
-                        if not click.confirm("Confirm front matter ('n' will open an editor for you to modify it).", default=True):
+                        if not yes and not click.confirm("Confirm front matter ('n' will open an editor for you to modify it).", default=True):
                             fm = click.edit(fm)
                             fm_valid = converter.validate_front_matter(fm)
                         else:
@@ -65,19 +66,17 @@ def run():
             click.secho(converter.get_summary(), fg='yellow')
             click.secho("*****CONVERTER SUMMARY END*****".format(nbtitle), fg='bright_white')
             
-            if not click.confirm(click.style("Write files and finish?", fg='green'), default=True):
+            if not yes and not click.confirm(click.style("Write files and finish?", fg='green'), default=True):
                 sys.exit(1)
             else:
                 click.echo("Preparing to write files to {}".format(config_dict['nb_write_path']))
-
-                if converter.existing_nbs:
-                    click.secho("Found existing files in write directory! Continuing will replace all existing files!", fg='red')
-                    if not click.confirm("Are you sure you want to continue? ('N' will exit)", default=True):
+                if config_dict.get('overwrite_existing', True):
+                    click.secho("Found existing files in write directory!", fg='red')
+                    click.secho("Continuing will replace all existing files with the same name!", fg='red')
+                    if not yes and not click.confirm("Are you sure you want to continue?", default=True):
                         sys.exit(1)
-                    else:
-                        converter.clean_write_dir()
                 else:
-                    logger.debug("No existing notebooks in write path")
+                    logger.debug("Overwrite disabled. Existing files will be preserved and only new ones added.")
 
                 click.echo("Writing notebooks...")
                 converter.write_nbs()
@@ -85,7 +84,7 @@ def run():
                 click.echo("Collecting and moving notebook assets to {}".format(config_dict['asset_write_path']))
                 converter.copy_and_move_assets()
             
-        click.secho("Site build complete! Check your docs/ folder.", fg='bright_white')
+        click.secho("Site build complete.", fg='bright_white')
 
 if __name__ == "__main__":
     run()

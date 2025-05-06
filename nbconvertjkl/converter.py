@@ -3,6 +3,7 @@ import os
 import re
 import logging
 import sys
+import shutil
 import nbformat
 
 from traitlets.config import Config
@@ -31,7 +32,7 @@ class Converter:
         
         self.logger.debug("Getting existing notebook files: {}".format(self.conf['nb_write_path']))
         
-        nb_file_paths = glob.glob(self.conf['nb_write_path'] + '*')
+        nb_file_paths = glob.glob(os.path.join(self.conf['nb_write_path'], '*'))
         nb_file_paths.sort()
 
         self.logger.debug("Found: {}".format(len(nb_file_paths)))
@@ -44,7 +45,7 @@ class Converter:
 
         self.logger.debug("Getting notebook files from {}".format(self.conf['nb_read_path']))
 
-        nb_file_paths = glob.glob(self.conf['nb_read_path'] + '*.ipynb')
+        nb_file_paths = glob.glob(os.path.join(self.conf['nb_read_path'], '*.ipynb'))
         nb_file_paths.sort()
 
         self.logger.debug("Found: {}".format(len(nb_file_paths)))
@@ -209,21 +210,13 @@ class Converter:
 
         self.logger.debug("Adding nb nav...")
 
-        # List of keys of nbs to build
         build_keys = [k for k in self.new_nbs if not self.new_nbs[k]['skip_build']] 
 
-        for i in range(len(build_keys)):
-            curr_nb_key = build_keys[i]
+        for i, curr_nb_key in enumerate(build_keys):
             self.logger.debug("{}".format(self.new_nbs[curr_nb_key]['fname']))
-            if i == 0:
-                prev_nb_key = None
-                next_nb_key = build_keys[i+1]
-            elif i == len(build_keys)-1:
-                prev_nb_key = build_keys[i-1]
-                next_nb_key = None
-            else:
-                prev_nb_key = build_keys[i-1]
-                next_nb_key = build_keys[i+1]
+            
+            prev_nb_key = build_keys[i - 1] if i > 0 else None
+            next_nb_key = build_keys[i + 1] if i < len(build_keys) - 1 else None
 
             self.new_nbs[curr_nb_key]['nav'] = self.get_nb_nav(prev_nb_key, next_nb_key)
 
@@ -245,43 +238,48 @@ class Converter:
         
         self.logger.debug("Removing files from write dir...")
 
-        files = glob.glob(self.conf['nb_write_path'] + '*')
+        files = glob.glob(os.path.join(self.conf['nb_write_path'], '*'))
         for f in files:
-            os.remove(f)
-            self.logger.debug("Removed: {}".format(f))
+            if os.path.isfile(f):
+                os.remove(f)
+                self.logger.debug("Removed file: {}".format(f))
+            elif os.path.isdir(f):
+                shutil.rmtree(f)
+                self.logger.debug("Removed directory: {}".format(f))
         
         return True
     
     
     def write_nbs(self):
-        """ Write notebooks"""
-
+        """ Write notebooks """
         self.logger.debug("Writing notebooks...")
 
-        for nbtitle in self.new_nbs.keys():
+        for nbtitle, nb in self.new_nbs.items():
+            if nb['skip_build']:
+                self.logger.debug("Skipped: {}".format(nbtitle))
+                continue
 
-            self.logger.debug("{}".format(nbtitle))
-            
-            if not self.new_nbs[nbtitle]['skip_build']:
-                #TODO create _notebooks if it doesn't exist rather than error
-                with open(self.conf['nb_write_path'] + self.new_nbs[nbtitle]['fname'] + '.html', "w") as file:
-                    
-                    file.write(self.new_nbs[nbtitle]['front_matter'])
-                    
-                    if self.new_nbs[nbtitle]['info']:
-                        file.write(self.new_nbs[nbtitle]['info'])
-                    
-                    if self.conf['nb_nav_top']:
-                        file.write(self.new_nbs[nbtitle]['nav'])
-                    
-                    file.write(self.new_nbs[nbtitle]['body'])
-                    
-                    if self.conf['nb_nav_bottom']:
-                        file.write(self.new_nbs[nbtitle]['nav'])
-                    
-                    self.logger.debug("Written.")    
+            out_path = os.path.join(self.conf['nb_write_path'], nb['fname'] + '.html')
+
+            if os.path.exists(out_path):
+                if self.conf.get('overwrite_existing', True):
+                    self.logger.debug(f"Overwriting: {out_path}")
+                else:
+                    self.logger.debug(f"File exists, skipping: {out_path}")
+                    continue
             else:
-                self.logger.debug("Skipped.")
+                self.logger.debug(f"Writing new file: {out_path}")
+
+            with open(out_path, "w") as file:
+                file.write(nb['front_matter'])
+                if nb['info']:
+                    file.write(nb['info'])
+                if self.conf['nb_nav_top']:
+                    file.write(nb['nav'])
+                file.write(nb['body'])
+                if self.conf['nb_nav_bottom']:
+                    file.write(nb['nav'])
+
         return True
 
 

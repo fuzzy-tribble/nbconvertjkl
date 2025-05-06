@@ -48,5 +48,6 @@ setuptools.setup(
         "traitlets==4.3.3",
         "webencodings==0.5.1",
         "zipp==2.0.1",
+        "pyyaml==6.0.1",
     ],
 )
