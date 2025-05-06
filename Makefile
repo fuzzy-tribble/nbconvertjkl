@@ -1,2 +1,2 @@
-init:
-	pip3 install -r requirements.txt
+dev-init:
+	pip install '-e.[dev]'

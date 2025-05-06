@@ -15,6 +15,14 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6,<3.7",
+    extras_require={
+        "dev": [
+            "pytest",
+            "black",
+            "build",
+            "twine",
+        ],
+    },
     install_requires=[
         "attrs==19.3.0",
         "bleach==3.1.0",

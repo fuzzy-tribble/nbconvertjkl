@@ -76,9 +76,17 @@ To contribute or work locally:
    ```
 
 4. **(Optional) Build and check package locally**
-   Building is  handles in the release-build job of the github action on release. But if you want to build locally, you can do so:
+   Building is  handles in the release-build job of the github action on release. 
+   
+   But if you want to build locally for debugging or whatever, you can do so:
    ```bash
    # Build and check package
-   python -m build
-   python -m twine check dist/*
+   python -m build # will gnerate source + wheel (dist/nbconvertjkl-0.1.0-py3-none-any.whl and dist/nbconvertjkl-0.1.0.tar.gz)
+   python -m twine check dist/* # check the package metadata is valid before uploading to PyPI
+   ```
+
+   You can also test install from local build:
+   ```bash
+   pip uninstall nbconvertjkl # remove any previous version
+   pip install dist/nbconvertjkl-0.1.0-py3-none-any.whl # install from local wheel
    ```
