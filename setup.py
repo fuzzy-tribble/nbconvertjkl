@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="nbconvertjkl-fuzzy-tribble",
+    name="nbconvertjkl",
     version="0.0.1",
     author="fuzzy-tribble",
     description="Convert ipynbs to Jekyll-compatible HTML/Markdown for GitHub Pages (adds front matter, navigation, asset fixes)",
@@ -17,8 +17,8 @@ setuptools.setup(
     python_requires=">=3.6,<3.7",
     extras_require={
         "dev": [
-            "pytest",
-            "black",
+            # "pytest",
+            # "black",
             "build",
             "twine",
         ],
