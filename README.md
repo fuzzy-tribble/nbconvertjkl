@@ -88,5 +88,5 @@ To contribute or work locally:
    You can also test install from local build:
    ```bash
    pip uninstall nbconvertjkl # remove any previous version
-   pip install dist/nbconvertjkl-0.1.0-py3-none-any.whl # install from local wheel
+   pip install dist/nbconvertjkl-0.1.0-py3-none-any.whl # install from wheel
    ```
