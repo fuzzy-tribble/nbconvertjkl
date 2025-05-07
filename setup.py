@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="nbconvertjkl",
-    version="0.0.1",
+    version="0.0.2",
     author="fuzzy-tribble",
     description="Convert ipynbs to Jekyll-compatible HTML/Markdown for GitHub Pages (adds front matter, navigation, asset fixes)",
     long_description=open("README.md").read(),
