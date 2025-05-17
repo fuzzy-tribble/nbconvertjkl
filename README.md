@@ -11,7 +11,7 @@ This tool converts Jupyter Notebooks (`.ipynb`) into HTML pages suitable for use
    - Configuration dictionary specifying read/write paths and asset subdirectories.
 
 2. **Processing**
-   - Parses metadata: title, topics (from first cell).
+   - Parses metadata: title, topics (from first cell) using keyword globs "Topics" 
    - Converts notebook to HTML using `nbconvert`.
    - Fixes relative links for images and assets (e.g., `src="/images/foo.png"` → Jekyll-compatible paths).
    - Adds YAML front matter for Jekyll layout integration.
@@ -36,10 +36,26 @@ pip install -r requirements.txt
 
 ## Usage
 
-To launch interactive command line site build
+The first cell of your notebooks are used to write front matter and topics to the table of contents of the Jekyll site. The first cell should contain the title and topics of the notebook. The tool will automatically parse this information and add it to the generated HTML files.
+
+The title and topics in the first cell should look like this:
+```markdown
+# My Notebook Title
+
+ **Topics Covered**
+ - Topic 1
+ - Topic 2
+```
+
+Everything else like (permalink, layout, the wrapping --- … ---) is auto-generated.  Likewise, footer/nav HTML is injected based on the converter’s config flags (no special notebook keywords needed).
+
+To build the site from your notebooks use:
 ```bash
 python -m nbconvertjkl
+# OR if you want to build/run automatically in a gh action or something
+python -m nbconvertjkl --yes
 ```
+
 
 ## Contributing
 

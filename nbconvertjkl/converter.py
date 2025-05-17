@@ -260,6 +260,7 @@ class Converter:
                 continue
 
             out_path = os.path.join(self.conf['nb_write_path'], nb['fname'] + '.html')
+            out_dir = os.path.dirname(out_path)
 
             if os.path.exists(out_path):
                 if self.conf.get('overwrite_existing', True):
@@ -269,6 +270,8 @@ class Converter:
                     continue
             else:
                 self.logger.debug(f"Writing new file: {out_path}")
+                # only create dir when its truly new
+                os.makedirs(out_dir, exist_ok=True)
 
             with open(out_path, "w") as file:
                 file.write(nb['front_matter'])
@@ -290,19 +293,21 @@ class Converter:
         
 
         for subdir in self.conf['asset_subdirs']:
-            
-            self.logger.debug("Looking in: {}".format(subdir))
-            files = glob.glob(self.conf['nb_read_path'] + subdir + '/*')
+            pattern = os.path.join(self.conf['nb_read_path'], subdir, '*')
+
+            self.logger.debug(f"Looking in subdir: {subdir} using glob pattern: {pattern}")
+            files = glob.glob(pattern)
             self.logger.debug("Found files: {}".format(files))
             
             for src in files:
                 if os.path.isfile(src):
-                    fname = src.split("/")[-1]
-                    self.logger.debug("Copying file: {}...".format(fname))
-                    fdest = self.conf['asset_write_path'] + subdir
-                    if not os.path.exists(fdest):
-                        os.makedirs(fdest)
-                    copyfile(src, fdest + '/' + fname)
+                    fname = os.path.basename(src)
+                    fdest = os.path.join(self.conf['asset_write_path'], subdir)
+                    os.makedirs(fdest, exist_ok=True)
+
+                    dest_path = os.path.join(fdest, fname)
+                    self.logger.debug("Copying file: %s → %s", src, dest_path)
+                    copyfile(src, dest_path)
 
         return True
 
